@@ -6,8 +6,9 @@ Created on Tue Dec 18 22:11:01 2018
 """
 
 
-import searchtweets, arcpy, yaml, os, tweet_parser, ast, flatten_dict
+import searchtweets, yaml, os, tweet_parser, ast, flatten_dict
 import pandas as pd
+import arcpy
 from aylienapiclient import textapi
 from datetime import datetime 
 from time import sleep
@@ -137,11 +138,12 @@ dfs = pd.read_csv(r'C:/Users/Jonathan/AppData/Local/Temp/scratch/tweets_noBB_pan
 def sentiment(dfs):
     startTime = datetime.now()
     dfs['sentiment_polarity'] = '' 
-    for row in range(0,len(dfs), 60):
+    for row in range(len(dfs)):
         text = str(dfs['text'].get_value(row))
         sentiment = client.Sentiment({'text': text})
         dfs['sentiment_polarity'][row] = sentiment
-        sleep(60)
+        if row%60 is 0:
+            sleep(60)
     print(datetime.now() - startTime)    
     
 sentiment(dfs)
