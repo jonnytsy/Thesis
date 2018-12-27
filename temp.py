@@ -100,8 +100,8 @@ def sentiment(dfs):
     print(datetime.now() - startTime)    
     
 sentiment(test1)
-
-test2['Unnamed: 0'] = test2[['Unnamed: 0'] - 2
+test2= test1.copy()
+test2['Unnamed: 0'] = test2['Unnamed: 0'] - 2
 
 import googletrans      
 translator = googletrans.Translator()
@@ -553,6 +553,12 @@ for row in range(len(abbrtest1)):
         abbrtest1['unified_text'][row]=  SimulSub( vernac_dict,text  )
 --------
 #compile
+import ast, flatten_dict, re,googletrans, emoji
+import pandas as pd
+from aylienapiclient import textapi
+from datetime import datetime 
+from time import sleep
+
 
 test = pd.read_csv(r'C:/Users/Jonathan/Desktop/Thesis/unified2212_cleaned.csv')
 test1 = pd.read_csv(r'C:/Users/Jonathan/Desktop/Thesis/unified2212_cleaned_reindex.csv')
@@ -567,8 +573,8 @@ def sentiment(dfs):
         if row%60 is 0:
             sleep(60)
     print(datetime.now() - startTime)    
-    
-test2['Unnamed: 0'] = test2[['Unnamed: 0'] - 2
+test2= pd.read_csv(r'C:/Users/Jonathan/Desktop/Thesis/unified2212_cleaned_reindex_sentiment.csv')
+test2['Unnamed: 0'] = test2['Unnamed: 0.1'] + 2
 
 import googletrans      
 transtest1 = test2.copy()
@@ -603,8 +609,8 @@ def translate_unified_text2(df):
 translate_unified_text2(transtest1)
 transtest.to_csv('C:/Users/Jonathan/Desktop/Thesis/transtest2412.csv')
 transtest1.to_csv('C:/Users/Jonathan/Desktop/Thesis/transtest24121.csv') 
-
-
+transtest1 = pd.read_csv(r'C:/Users/Jonathan/Desktop/Thesis/transtest24121.csv')
+transtest1['Unnamed: 0']= transtest1['Unnamed: 0.1']
 
 
 abbr_dict1= {"wtf": "what the fuck",
@@ -631,6 +637,10 @@ abbr_dict1= {"wtf": "what the fuck",
    'lmao': 'laughing my ass off',
    'lol': 'laughing out loud',
    'pls': 'please',
+   'fkin': 'fucking',
+   'lul': 'laughing out loud',
+   '):' : 'sad face',
+    'asf': 'as fuck'
 }
 
 vernac_dict= {"cb": "cunt",
@@ -658,7 +668,8 @@ vernac_dict= {"cb": "cunt",
   'sienz': 'bummer',
   'swee':'great',
   'ya allah': 'oh god',
-  'haihh': 'sigh'
+  'haihh': 'sigh',
+  'cibai': 'cunt' 
   }
 
 comb_dict= abbr_dict1.copy()
@@ -721,23 +732,60 @@ for  row in range(len(comparison1)):
 
 comparison1['polarity_conf_changed']= ''
 for  row in range(len(comparison1)):
-    a=''
-    b=''
+#    a=''
+#    b=''
    
     if comparison1['polarity_re'].get_value(row) == 'positive':
         a= comparison1['polarity_confidence_re'].get_value(row) + 2
-    elif comparison1['polarity_re'].get_value(row) == 'neutral':
+    elif  comparison1['polarity_re'].get_value(row) == 'neutral':
         a= comparison1['polarity_confidence_re'].get_value(row) + 1
     else:
         a= comparison1['polarity_confidence_re'].get_value(row)
     pass
-    if comparison1['polarity'].get_value(row) == 'positive':
+    if  comparison1['polarity'].get_value(row) == 'positive':
         b= comparison1['polarity_confidence'].get_value(row) + 2
-    elif comparison1['polarity_re'].get_value(row) == 'neutral':
+    elif  comparison1['polarity'].get_value(row) == 'neutral':
         b= comparison1['polarity_confidence'].get_value(row) + 1
     else:
         b= comparison1['polarity_confidence'].get_value(row)
     comparison1['polarity_conf_changed'][row]= a-b
 
+comparison1['subjectivity_changed']= ''
+for  row in range(len(comparison1)):
+    if comparison1['subjectivity'].get_value(row) == comparison1['subjectivity_re'].get_value(row):
+        comparison1['subjectivity_changed'][row]= 0
+    else:
+        comparison1['subjectivity_changed'][row]= 1
 
 
+comparison1['subjectivity_conf_changed']= ''
+for  row in range(len(comparison1)):
+    a=''
+    b=''
+    
+    if  str(comparison1['subjectivity_re'].get_value(row)) == 'subjective':
+        a= comparison1['subjectivity_confidence_re'].get_value(row) + 1
+    else:
+        a= comparison1['subjectivity_confidence_re'].get_value(row)
+    pass
+    if  str(comparison1['subjectivity'].get_value(row)) == 'subjective':
+        b= comparison1['subjectivity_confidence'].get_value(row) + 1
+    else:
+        b= comparison1['subjectivity_confidence'].get_value(row)
+    comparison1['subjectivity_conf_changed'][row]= a-b
+
+
+comparison_out = comparison1[['id', 'Unnamed: 0','unified_text','text_re',  'polarity','polarity_re', 'polarity_confidence','polarity_confidence_re','polarity_changed',
+       'polarity_conf_changed','subjectivity', 'subjectivity_re',
+        'subjectivity_confidence','subjectivity_confidence_re','subjectivity_changed', 'subjectivity_conf_changed']].copy()
+
+comparison_out.to_csv('C:/Users/Jonathan/Desktop/Thesis/comparison_out.csv')                             
+
+### rectify jumbled index                              
+#re_sentiment1= re_sentiment1.merge(transtest1[['Unnamed: 0.1','Unnamed: 0']], left_on=['Unnamed: 0_re'], right_on=['Unnamed: 0'])                              
+#re_sentiment1['Unnamed: 0_re'] = re_sentiment1['Unnamed: 0.1']                 
+#re_sentiment1 = re_sentiment1.drop(['Unnamed: 0.1','Unnamed: 0'], axis = 1)   
+
+
+
+               
